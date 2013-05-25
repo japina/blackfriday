@@ -14,7 +14,9 @@
 package blackfriday
 
 import (
+	"pageparse"
 	"bytes"
+	"fmt"
 )
 
 // Parse block-level data.
@@ -39,6 +41,7 @@ func (p *parser) block(out *bytes.Buffer, data []byte) {
 		// ## Header 2
 		// ...
 		// ###### Header 6
+
 		if p.isPrefixHeader(data) {
 			data = data[p.prefixHeader(out, data):]
 			continue
@@ -108,6 +111,22 @@ func (p *parser) block(out *bytes.Buffer, data []byte) {
 			continue
 		}
 
+// added by b0j3
+		if data[0] == '{' {
+		//out.WriteString(" bla ")
+			var i int
+			var variable bytes.Buffer
+			for i = 0; data[i] != '\n'; i++ {
+				variable.WriteByte(data[i])
+			}
+			pageparse.ParseData(variable.String())
+			out.WriteString(variable.String())
+			data = data[i:]
+
+			continue
+		}
+
+
 		// block quote:
 		//
 		// > A big quote I found somewhere
@@ -117,7 +136,7 @@ func (p *parser) block(out *bytes.Buffer, data []byte) {
 			continue
 		}
 
-		// table:
+		// tastentble:
 		//
 		// Name  | Age | Phone
 		// ------|-----|---------
@@ -979,6 +998,13 @@ func (p *parser) list(out *bytes.Buffer, data []byte, flags int) int {
 	p.r.List(out, work, flags)
 	return i
 }
+
+// added b0j3
+func (p *parser) parseDynamic(out *bytes.Buffer, text []byte) {
+	fmt.Printf("tes_t")
+	out.WriteString(" bla ")
+}
+// end b0j3
 
 // Parse a single list item.
 // Assumes initial prefix is already removed if this is a sublist.
